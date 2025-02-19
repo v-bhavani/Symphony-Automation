@@ -102,7 +102,7 @@ for IMAGE in "${IMAGES[@]}"; do
 
   # Add delay 
   echo "Waiting for Inspector report generation..."
-  sleep 60
+  sleep 100
 
   echo "Inspector report export to s3."
 
