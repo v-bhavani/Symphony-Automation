@@ -116,7 +116,6 @@ for IMAGE in "${IMAGES[@]}"; do
     }' 
 
   # Clean up locally tagged images
-  echo "Cleaning up locally tagged image: $IMAGE_TAGGED"
   docker rmi "$IMAGE_TAGGED"  >> "$LOG_FILE" 2>&1
   if [ $? -ne 0 ]; then
       echo "Warning: Failed to remove local image $IMAGE_TAGGED"
