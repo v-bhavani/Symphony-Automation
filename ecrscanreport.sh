@@ -37,8 +37,7 @@ echo "Script started at $(date)"
 REPO_CHECK=$(aws ecr describe-repositories --repository-names $ECR_REPO_NAME --region $AWS_REGION 2>/dev/null) >> "$LOG_FILE" 2>&1
 
 if [ -z "$REPO_CHECK" ]; then
-  # echo "ECR repository does not exist. Creating repository..."
-  aws ecr create-repository --repository-name $ECR_REPO_NAME --region $AWS_REGION >> "$LOG_FILE" 2>&1
+  aws ecr create-repository --repository-name $ECR_REPO_NAME --region $AWS_REGION --image-scanning-configuration scanOnPush=true >> "$LOG_FILE" 2>&1
   echo "Repository created : $ECR_REPO_NAME"
 
 else
