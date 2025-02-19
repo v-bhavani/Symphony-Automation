@@ -102,7 +102,7 @@ for IMAGE in "${IMAGES[@]}"; do
 
   # Add delay 
   echo "Waiting for Inspector report generation..."
-  sleep 100
+  sleep 30
 
   echo "Inspector report export to s3."
 
@@ -113,7 +113,7 @@ for IMAGE in "${IMAGES[@]}"; do
     --filter-criteria '{
         "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}],
         "ecrImageTags": [{"comparison": "EQUALS", "value": "'"$IMAGE_TAG"'"}]
-    }'  >> "$LOG_FILE" 2>&1
+    }' 
 
   # Clean up locally tagged images
   echo "Cleaning up locally tagged image: $IMAGE_TAGGED"
