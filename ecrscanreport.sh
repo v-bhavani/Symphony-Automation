@@ -55,10 +55,11 @@ fi
 
 echo "Inspector report export to s3."
 
-aws inspector2 create-findings-report \
+report_id=$(aws inspector2 create-findings-report \
     --region "$AWS_REGION" \
     --report-format CSV \
     --s3-destination bucketName="$S3_BUCKET_NAME",keyPrefix="$S3_KEY_PREFIX",kmsKeyArn="$KMS_KEY_ARN" \
-    --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' 
-
+    --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }')
+sleep 10
+echo "##gbStart##reportid##splitKeyValue##${report_id}##gbEnd##"
 echo "Inspector report export to s3 completed."
