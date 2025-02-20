@@ -45,13 +45,11 @@ else
 fi
 # Inspector report export to s3
 echo "Inspector report exporting to s3."
-aws inspector2 create-findings-report \
+report_id=$(aws inspector2 create-findings-report \
     --region "$AWS_REGION" \
     --report-format CSV \
     --s3-destination bucketName="$S3_BUCKET_NAME",keyPrefix="$S3_KEY_PREFIX",kmsKeyArn="$KMS_KEY_ARN" \
-    --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' | tee /tmp/reportid.log
+    --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' | awk 'NR==2{ print; exit }' | awk '{print$2}' | tr -d '"')
 sleep 5
-report_id=$(cat /tmp/reportid.log | awk 'NR==2{ print; exit }' | awk '{print$2}' | tr -d '"')
-echo "Report ID is : ${report_id}"
 echo "##gbStart##reportid##splitKeyValue##${report_id}##gbEnd##"
 echo "Inspector report export to s3 completed."
