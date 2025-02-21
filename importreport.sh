@@ -55,19 +55,22 @@ fi
 
 echo "Inspector report exporting to s3."
 
+# Run AWS Inspector2 report generation and capture the exit status
 report_id=$(aws inspector2 create-findings-report \
     --region "$AWS_REGION" \
     --report-format CSV \
     --s3-destination bucketName="$S3_BUCKET_NAME",keyPrefix="$S3_KEY_PREFIX",kmsKeyArn="$KMS_KEY_ARN" \
     --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' | awk 'NR==2{ print; exit }' | awk '{print$2}' | tr -d '"')
-sleep 5
-echo "Report ID is : ${report_id}"
 
-echo "##gbStart##reportid##splitKeyValue##${report_id}##gbEnd##"
+# Capture exit status of AWS CLI command
+aws_status=$?
 
-if [ $? -eq 0 ]; then
+if [ $aws_status -eq 0 ] && [ -n "$report_id" ]; then
+    echo "Report ID is : ${report_id}"
+    echo "##gbStart##reportid##splitKeyValue##${report_id}##gbEnd##"
     echo "Report generated and exported to S3 successfully."
 else
     echo "Failed: Report generation encountered an error."
     exit 1
 fi
+
