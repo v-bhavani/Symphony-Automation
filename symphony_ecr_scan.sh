@@ -10,8 +10,6 @@ S3_BUCKET_NAME="symecrfindings"
 S3_KEY_PREFIX="cves"
 KMS_KEY_ARN="arn:aws:kms:us-east-1:087273302893:key/f890fb1f-b180-4db0-b0fe-11420270552c"
 LOG_FILE="symphony_ecr_scan.log"
-LOCAL_CSV="/home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv"
-MODIFIED_CSV="/home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").csv"
 
 execute_command() {
     local command="$1"
@@ -70,39 +68,35 @@ if [ -z "$report_id" ]; then
 fi
 
 # Download the CSV file from S3
-aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv "$LOCAL_CSV"
-
-# Check if the file was downloaded
-if [ ! -f "$LOCAL_CSV" ]; then
-    echo "Error: CSV file not found!"
-    exit 1
-fi
+aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
 
 # Extract Summary Information
-total_vulns=$(tail -n +2 "$LOCAL_CSV" | wc -l) # Count total findings (excluding header)
-high_count=$(grep -i "HIGH" "$LOCAL_CSV" | wc -l)
-medium_count=$(grep -i "MEDIUM" "$LOCAL_CSV" | wc -l)
-low_count=$(grep -i "LOW" "$LOCAL_CSV" | wc -l)
-critical_count=$(grep -i "CRITICAL" "$LOCAL_CSV" | wc -l)
-untriaged_count=$(grep -i "UNTRIAGED" "$LOCAL_CSV" | wc -l)
+total_vulns=$(tail -n +2 /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l) # Count total findings (excluding header)
+high_count=$(grep -i "HIGH" /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l)
+medium_count=$(grep -i "MEDIUM" /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l)
+low_count=$(grep -i "LOW" /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l)
+critical_count=$(grep -i "CRITICAL" /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l)
+untriaged_count=$(grep -i "UNTRIAGED" /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv | wc -l)
 
 # Append Summary to CSV
-echo "" >> "$LOCAL_CSV"
-echo "Summary Report" >> "$LOCAL_CSV"
-echo "Total Findings, $total_vulns" >> "$LOCAL_CSV"
-echo "Critical, $critical_count" >> "$LOCAL_CSV"
-echo "High, $high_count" >> "$LOCAL_CSV"
-echo "Medium, $medium_count" >> "$LOCAL_CSV"
-echo "Low, $low_count" >> "$LOCAL_CSV"
+echo "" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "Summary Report" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "Total Findings, $total_vulns" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "Critical, $critical_count" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "High, $high_count" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "Medium, $medium_count" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
+echo "Low, $low_count" >> /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv
 
-# Rename the file with '_SUMMARY'
-mv "$LOCAL_CSV" "$MODIFIED_CSV"
+mv /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").csv
 
 # Upload the modified CSV back to S3
-aws s3 cp "$MODIFIED_CSV" s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/
+aws s3 cp /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").csv s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/
 
+# Remove the original CSV from S3
+aws s3 rm s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv
 # Cleanup local files
-rm -rf "$MODIFIED_CSV"
+sudo rm -rf /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").csv
+
 
 if [ $? -eq 0 ]; then
     currentdate=$(date +"%d-%m-%Y")  
