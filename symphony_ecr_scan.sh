@@ -66,15 +66,29 @@ if [ -z "$report_id" ]; then
     exit 1
 fi
 aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT$(date +"%d-%m-%Y").csv
-aws s3 cp /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT$(date +"%d-%m-%Y").csv s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/
-aws s3 rm s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv
-sudo rm -rf /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT$(date +"%d-%m-%Y").csv
-
-if [ $? -eq 0 ]; then
-    currentdate=$(date +"%d-%m-%Y")  
-    echo "##gbStart##currentdate##splitKeyValue##${currentdate}##gbEnd##"
-    echo "Report generated and exported to S3 completed successfully."
-else
-    echo "S3 and local cleanup failed."
+if [ $? -ne 0 ]; then
+    echo "Failed to download file from S3."
     exit 1
 fi
+
+aws s3 cp /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT$(date +"%d-%m-%Y").csv s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/
+if [ $? -ne 0 ]; then
+    echo "Failed to upload file to S3."
+    exit 1
+fi
+
+aws s3 rm s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv
+if [ $? -ne 0 ]; then
+    echo "Failed to delete original file from S3."
+    exit 1
+fi
+
+sudo rm -rf /home/ec2-user/ECR_SYMPHONY_SCAN_REPORT$(date +"%d-%m-%Y").csv
+if [ $? -ne 0 ]; then
+    echo "Failed to remove local file."
+    exit 1
+fi
+
+currentdate=$(date +"%d-%m-%Y")
+echo "##gbStart##currentdate##splitKeyValue##${currentdate}##gbEnd##"
+echo "Report generated and exported to S3 completed successfully."
