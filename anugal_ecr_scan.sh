@@ -7,7 +7,7 @@ AWS_ACCESS_KEY_ID="$Accesskey"
 AWS_SECRET_ACCESS_KEY="$Secretkey"
 ECR_REPO_NAME="anugal/bcs"
 S3_BUCKET_NAME="symecrfindings"
-S3_KEY_PREFIX="cves/"
+S3_KEY_PREFIX="cves"
 KMS_KEY_ARN="arn:aws:kms:us-east-1:087273302893:key/f890fb1f-b180-4db0-b0fe-11420270552c"
 LOG_FILE="anugal_ecr_script.log"
 
@@ -56,17 +56,24 @@ fi
 echo "Inspector report exporting to s3."
 sleep 100
 # Run AWS Inspector2 report generation
-anugal_report_id=$(aws inspector2 create-findings-report \
+report_id=$(aws inspector2 create-findings-report \
     --region "$AWS_REGION" \
     --report-format CSV \
     --s3-destination bucketName="$S3_BUCKET_NAME",keyPrefix="$S3_KEY_PREFIX",kmsKeyArn="$KMS_KEY_ARN" \
     --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' | awk 'NR==2{ print; exit }' | awk '{print$2}' | tr -d '"')
-
+if [ -z "$report_id" ]; then
+    echo "Failed: Report generation encountered an error."
+    exit 1
+fi
+aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv /home/ec2-user/ECR_ANUGAL_SCAN_REPORT$(date +"%d-%m-%Y").csv
+aws s3 cp /home/ec2-user/ECR_ANUGAL_SCAN_REPORT$(date +"%d-%m-%Y").csv s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/
+aws s3 rm s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$report_id.csv
+sudo rm -rf /home/ec2-user/ECR_ANUGAL_SCAN_REPORT$(date +"%d-%m-%Y").csv
 if [ $? -eq 0 ]; then
-    echo "Report ID is : ${anugal_report_id}"
-    echo "##gbStart##anugal_report_id##splitKeyValue##${anugal_report_id}##gbEnd##"
+    currentdate=$(date +"%d-%m-%Y")  
+    echo "##gbStart##currentdate##splitKeyValue##${currentdate}##gbEnd##"
     echo "Report generated and exported to S3 completed successfully."
 else
-    echo "Failed: Report generation encountered an error."
+    echo "S3 and local cleanup failed."
     exit 1
 fi
