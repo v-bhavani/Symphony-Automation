@@ -7,7 +7,7 @@ AWS_ACCESS_KEY_ID="$Accesskey"
 AWS_SECRET_ACCESS_KEY="$Secretkey"
 ECR_REPO_NAME="anugal/bcs"
 S3_BUCKET_NAME="symecrfindings"
-S3_KEY_PREFIX="cves/anugal"
+S3_KEY_PREFIX="cves/"
 KMS_KEY_ARN="arn:aws:kms:us-east-1:087273302893:key/f890fb1f-b180-4db0-b0fe-11420270552c"
 LOG_FILE="anugal_ecr_script.log"
 
