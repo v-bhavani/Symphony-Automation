@@ -72,6 +72,7 @@ high_count=$(grep -i "HIGH" $Local_csv_path | wc -l)
 medium_count=$(grep -i "MEDIUM" $Local_csv_path | wc -l)
 low_count=$(grep -i "LOW" $Local_csv_path | wc -l)
 critical_count=$(grep -i "CRITICAL" $Local_csv_path | wc -l)
+untriaged_count=$(grep -i "UNTRIAGED" $Local_csv_path | wc -l)
 # Append Summary to CSV
 echo "" >> $Local_csv_path
 echo "Summary Report" >> $Local_csv_path
@@ -80,6 +81,7 @@ echo "Critical, $critical_count" >> $Local_csv_path
 echo "High, $high_count" >> $Local_csv_path
 echo "Medium, $medium_count" >> $Local_csv_path
 echo "Low, $low_count" >> $Local_csv_path
+echo "Untriaged, $untriaged_count" >> $Local_csv_path
 # Rename the CSV file
 mv $Local_csv_path $Final_csv_path
 if [ $? -ne 0 ]; then
