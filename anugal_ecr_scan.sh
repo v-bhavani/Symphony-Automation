@@ -60,6 +60,7 @@ if [ -z "$anugal_report_id" ]; then
     exit 1
 fi
 # Download the CSV file from S3
+sleep 20
 aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$anugal_report_id.csv $Local_csv_path >> "$LOG_FILE" 2>&1
 if [ $? -ne 0 ]; then
     echo "Failed to download file from S3."
