@@ -66,22 +66,22 @@ if [ $? -ne 0 ]; then
     echo "Failed to download file from S3."
     exit 1
 fi
-# Extract Summary Information
-total_vulns=$(tail -n +2 $Local_csv_path | wc -l) # Count total findings (excluding header)
-high_count=$(grep -i "HIGH" $Local_csv_path | wc -l)
-medium_count=$(grep -i "MEDIUM" $Local_csv_path | wc -l)
-low_count=$(grep -i "LOW" $Local_csv_path | wc -l)
-critical_count=$(grep -i "CRITICAL" $Local_csv_path | wc -l)
-untriaged_count=$(grep -i "UNTRIAGED" $Local_csv_path | wc -l)
+# Extract Summary Information from the 2nd column (Severity column)
+total_vulns=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | wc -l)  # Count total findings (excluding header)
+high_count=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | grep -i "HIGH" | wc -l)
+medium_count=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | grep -i "MEDIUM" | wc -l)
+low_count=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | grep -i "LOW" | wc -l)
+critical_count=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | grep -i "CRITICAL" | wc -l)
+untriaged_count=$(tail -n +2 "$Local_csv_path" | cut -d',' -f2 | grep -i "UNTRIAGED" | wc -l)
 # Append Summary to CSV
-echo "" >> $Local_csv_path
-echo "Summary Report" >> $Local_csv_path
-echo "Total Findings, $total_vulns" >> $Local_csv_path
-echo "Critical, $critical_count" >> $Local_csv_path
-echo "High, $high_count" >> $Local_csv_path
-echo "Medium, $medium_count" >> $Local_csv_path
-echo "Low, $low_count" >> $Local_csv_path
-echo "Untriaged, $untriaged_count" >> $Local_csv_path
+echo "" >> "$Local_csv_path"
+echo "Summary Report" >> "$Local_csv_path"
+echo "Total Findings, $total_vulns" >> "$Local_csv_path"
+echo "Critical, $critical_count" >> "$Local_csv_path"
+echo "High, $high_count" >> "$Local_csv_path"
+echo "Medium, $medium_count" >> "$Local_csv_path"
+echo "Low, $low_count" >> "$Local_csv_path"
+echo "Untriaged, $untriaged_count" >> "$Local_csv_path"
 # Rename the CSV file
 mv $Local_csv_path $Final_csv_path
 if [ $? -ne 0 ]; then
