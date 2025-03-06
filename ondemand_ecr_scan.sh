@@ -10,7 +10,7 @@ S3_BUCKET_NAME="symecrfindings"
 S3_KEY_PREFIX="cves"
 KMS_KEY_ARN="arn:aws:kms:us-east-1:087273302893:key/f890fb1f-b180-4db0-b0fe-11420270552c"
 LOG_FILE="symphony_ecr_scan.log"
-Local_csv_path="/home/ec2-user/SCAN_REPORT_"$ECR_REPO_NAME"_local$(date +"%d-%m-%Y").csv"
+Local_csv_path="/home/ec2-user/ECR_SCAN_REPORT_local$(date +"%d-%m-%Y").csv"
 Final_csv_path="/home/ec2-user/ECR_SCAN_REPORT_$(date +"%d-%m-%Y").csv"
 execute_command() {
     local command="$1"
