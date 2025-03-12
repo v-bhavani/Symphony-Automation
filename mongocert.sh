@@ -1,12 +1,27 @@
 #!/bin/bash
 
-# Define Log File
-LOG_FILE="mongo_cert_creation"
+# Variables
+AWS_ACCOUNT_ID="087273302893"
+CERT_DIR="mongo_cert"
+CERT_PATH="/home/$CERT_DIR"
+BITBUCKET_USERNAME="subash_bcs" # Replace with your Bitbucket username
+PAT="$Bitbucket_PAT"   # Replace with your PAT
+REPO_URL="https://${BITBUCKET_USERNAME}:${PAT}@bitbucket.org/bcs_team_dev/sym_distro_mongo.git" # Replace with your repository URL
+BRANCH_NAME="feature/x509_enabled"     # Replace with the branch you want to checkout
+AWS_ACCESS_KEY_ID="$AWS_access_key" # Replace with your AWS access key
+AWS_SECRET_ACCESS_KEY="$AWS_secret_key" # Replace with your AWS secret key
+AWS_DEFAULT_REGION="us-east-1" # Replace with your AWS region
+ZIP_FILE="certs.zip" # Replace with the zip file name
+S3_BUCKET="s3://symphonydistro/mongo/customer"
+CUSTOMER_NAME="$Customer" # Replace with the customer name
+MONGO_VERSION="v6.0.12" # Replace with the MongoDB version
+# ECR_REPOSITORY="$Ecr_repository" # Replace with the ECR repository name
+LOG_FILE="mongo_cert_creation_$CUSTOMER_NAME"
 LOG_FILE_PATH="/var/log/$LOG_FILE.log"  # Change this path if needed
 
-# Ensure the log file exists and set proper permissions
-touch "$LOG_FILE_PATH"
-chmod 644 "$LOG_FILE_PATH"
+# # Ensure the log file exists and set proper permissions
+# touch "$LOG_FILE_PATH"
+# chmod 644 "$LOG_FILE_PATH"
 
 # Function to execute commands silently
 execute_command() {
@@ -22,23 +37,6 @@ execute_command() {
 step_done() {
     echo "$1 ✅"
 }
-
-# Variables
-AWS_ACCOUNT_ID="$Account_id"
-CERT_DIR="$Certificate_path"
-CERT_PATH="/home/$CERT_DIR"
-BITBUCKET_USERNAME="subash_bcs" # Replace with your Bitbucket username
-PAT="$Bitbucket_PAT"   # Replace with your PAT
-REPO_URL="https://${BITBUCKET_USERNAME}:${PAT}@bitbucket.org/bcs_team_dev/sym_distro_mongo.git" # Replace with your repository URL
-BRANCH_NAME="feature/x509_enabled"     # Replace with the branch you want to checkout
-AWS_ACCESS_KEY_ID="$AWS_access_key" # Replace with your AWS access key
-AWS_SECRET_ACCESS_KEY="$AWS_secret_key" # Replace with your AWS secret key
-AWS_DEFAULT_REGION="$AWS_Region" # Replace with your AWS region
-ZIP_FILE="certs.zip" # Replace with the zip file name
-S3_BUCKET="s3://symphonydistro/mongo/customer"
-CUSTOMER_NAME="$Customer" # Replace with the customer name
-MONGO_VERSION="v6.0.12" # Replace with the MongoDB version
-ECR_REPOSITORY="$Ecr_repository" # Replace with the ECR repository name
 
 # Export AWS credentials
 export AWS_ACCESS_KEY_ID
@@ -119,23 +117,23 @@ step_done "Docker image saved as tar file."
 aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/" >> "$LOG_FILE" 2>&1
 step_done "Mongo tar file uploaded to S3."
 
-# Step 11: Login to AWS ECR
-aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com" >> "$LOG_FILE" 2>&1
-step_done "Logged into AWS ECR."
+# # Step 11: Login to AWS ECR
+# aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com" >> "$LOG_FILE" 2>&1
+# step_done "Logged into AWS ECR."
 
-# Step 12: Check and create ECR repository if not exists
-REPO_CHECK=$(aws ecr describe-repositories --region "$AWS_DEFAULT_REGION" --repository-names "$ECR_REPOSITORY" 2>/dev/null)
-if [ $? -ne 0 ]; then
-    aws ecr create-repository --region "$AWS_DEFAULT_REGION" --repository-name "$ECR_REPOSITORY" >> "$LOG_FILE" 2>&1
-    step_done "ECR repository $ECR_REPOSITORY created."
-else
-    step_done "ECR repository $ECR_REPOSITORY already exists."
-fi
+# # Step 12: Check and create ECR repository if not exists
+# REPO_CHECK=$(aws ecr describe-repositories --region "$AWS_DEFAULT_REGION" --repository-names "$ECR_REPOSITORY" 2>/dev/null)
+# if [ $? -ne 0 ]; then
+#     aws ecr create-repository --region "$AWS_DEFAULT_REGION" --repository-name "$ECR_REPOSITORY" >> "$LOG_FILE" 2>&1
+#     step_done "ECR repository $ECR_REPOSITORY created."
+# else
+#     step_done "ECR repository $ECR_REPOSITORY already exists."
+# fi
 
-# Step 13: Push the Docker image to ECR
-FULL_ECR_TAG="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY}:mongo$MONGO_VERSION"
-docker tag "$CUSTOMER_NAME:mongo$MONGO_VERSION" "$FULL_ECR_TAG" >> "$LOG_FILE" 2>&1
-docker push "$FULL_ECR_TAG" >> "$LOG_FILE" 2>&1
-step_done "Docker image pushed to ECR."
+# # Step 13: Push the Docker image to ECR
+# FULL_ECR_TAG="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY}:mongo$MONGO_VERSION"
+# docker tag "$CUSTOMER_NAME:mongo$MONGO_VERSION" "$FULL_ECR_TAG" >> "$LOG_FILE" 2>&1
+# docker push "$FULL_ECR_TAG" >> "$LOG_FILE" 2>&1
+# step_done "Docker image pushed to ECR."
 
 echo "MongoDB certificate creation and deployment completed successfully! 🎉"
