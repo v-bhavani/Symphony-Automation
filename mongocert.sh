@@ -114,7 +114,8 @@ docker save -o "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$CUSTOMER_NAME:mon
 step_done "Docker image saved as tar file."
 
 # Step 10: Upload the tar file to S3
-aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/" >> "$LOG_FILE" 2>&1
+# aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/" >> "$LOG_FILE" 2>&1
+aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/key/" >> "$LOG_FILE" 2>&1
 step_done "Mongo tar file uploaded to S3."
 
 # # Step 11: Login to AWS ECR
