@@ -169,7 +169,7 @@ fi
 
 # Step 10: Upload the tar file to S3
 # aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/"  >> "$LOG_FILE_PATH" 2>&1
-aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/key/"  >> "$LOG_FILE_PATH" 2>&1
+aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/key/mongo_${MONGO_VERSION}.tar"  >> "$LOG_FILE_PATH" 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Failed to upload the Docker image to S3. Check logs at $LOG_FILE_PATH"
     exit 1
