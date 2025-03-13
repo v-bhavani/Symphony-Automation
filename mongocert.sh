@@ -113,7 +113,7 @@ else
     echo "Symphony certificates generated."
 fi
 cat certs/clients/symphony/symphony.pem >> "$LOG_FILE_PATH" 2>&1
-aws s3 cp certs/clients/symphony/symphony.pem "$S3_BUCKET/$CUSTOMER_NAME/key/mongodb.pem"  >> "$LOG_FILE_PATH" 2>&1
+aws s3 cp certs/clients/symphony/symphony.pem "$S3_BUCKET/$CUSTOMER_NAME/certs/mongodb.pem"  >> "$LOG_FILE_PATH" 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Failed to upload Symphony certificate to S3. Check logs at $LOG_FILE_PATH"
     exit 1
@@ -141,7 +141,7 @@ fi
 
 # Upload CA and Symphony certificates to S3
 cat certs/ca/ca.pem >> "$LOG_FILE_PATH" 2>&1
-aws s3 cp certs/ca/ca.pem "$S3_BUCKET/$CUSTOMER_NAME/key/rootCA.pem" >> "$LOG_FILE_PATH" 2>&1
+aws s3 cp certs/ca/ca.pem "$S3_BUCKET/$CUSTOMER_NAME/certs/rootCA.pem" >> "$LOG_FILE_PATH" 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Failed to upload CA certificate to S3. Check logs at $LOG_FILE_PATH"
     exit 1
@@ -168,8 +168,7 @@ else
 fi
 
 # Step 10: Upload the tar file to S3
-# aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/"  >> "$LOG_FILE_PATH" 2>&1
-aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/key/mongo_${MONGO_VERSION}.tar"  >> "$LOG_FILE_PATH" 2>&1
+aws s3 cp "${CUSTOMER_NAME}_mongo_${MONGO_VERSION}.tar" "$S3_BUCKET/$CUSTOMER_NAME/images/mongo_${MONGO_VERSION}.tar"  >> "$LOG_FILE_PATH" 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Failed to upload the Docker image to S3. Check logs at $LOG_FILE_PATH"
     exit 1
