@@ -11,7 +11,7 @@ S3_KEY_PREFIX="cves"
 KMS_KEY_ARN="arn:aws:kms:us-east-1:087273302893:key/f890fb1f-b180-4db0-b0fe-11420270552c"
 LOG_FILE="symphony_ecr_scan.log"
 Local_csv_path="/home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_local$(date +"%d-%m-%Y").csv"
-Final_csv_path="/home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").csv"
+Final_csv_path="/home/ec2-user/ECR_SYMPHONY_SCAN_REPORT_$(date +"%d-%m-%Y").xlsx"
 execute_command() {
     local command="$1"
     eval "$command" >> "$LOG_FILE" 2>&1
@@ -82,10 +82,16 @@ echo "High, $high_count" >> "$Local_csv_path"
 echo "Medium, $medium_count" >> "$Local_csv_path"
 echo "Low, $low_count" >> "$Local_csv_path"
 echo "Untriaged, $untriaged_count" >> "$Local_csv_path"
-# Rename the CSV file
-mv $Local_csv_path $Final_csv_path
+# # Rename the CSV file
+# mv $Local_csv_path $Final_csv_path
+# if [ $? -ne 0 ]; then
+#     echo "Failed to rename file."
+#     exit 1
+# fi
+# Convert CSV to XLSX
+python3 -c "import pandas as pd; pd.read_csv('$Local_csv_path').to_excel('$Final_csv_path', index=False)"
 if [ $? -ne 0 ]; then
-    echo "Failed to rename file."
+    echo "Failed to convert CSV to XLSX."
     exit 1
 fi
 # Upload the modified CSV back to S3
