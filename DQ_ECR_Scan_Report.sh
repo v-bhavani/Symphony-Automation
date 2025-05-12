@@ -49,19 +49,19 @@ fi
 echo "Inspector report exporting to s3."
 sleep 100
 # Run AWS Inspector2 report generation
-symphony_report_id=$(aws inspector2 create-findings-report \
+dq_report_id=$(aws inspector2 create-findings-report \
     --region "$AWS_REGION" \
     --report-format CSV \
     --s3-destination bucketName="$S3_BUCKET_NAME",keyPrefix="$S3_KEY_PREFIX",kmsKeyArn="$KMS_KEY_ARN" \
     --filter-criteria '{ "ecrImageRepositoryName": [{"comparison": "EQUALS", "value": "'"$ECR_REPO_NAME"'"}] }' | awk 'NR==2{ print; exit }' | awk '{print$2}' | tr -d '"')
-echo "Report ID is : ${symphony_report_id}"
-if [ -z "$symphony_report_id" ]; then
+echo "Report ID is : ${dq_report_id}"
+if [ -z "$dq_report_id" ]; then
     echo "Failed: Report generation encountered an error."
     exit 1
 fi
 # Download the CSV file from S3
 sleep 20
-aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$symphony_report_id.csv $Local_csv_path >> "$LOG_FILE" 2>&1
+aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$dq_report_id.csv $Local_csv_path >> "$LOG_FILE" 2>&1
 if [ $? -ne 0 ]; then
     echo "Failed to download file from S3."
     exit 1
