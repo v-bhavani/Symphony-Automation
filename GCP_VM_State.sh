@@ -35,3 +35,4 @@ for project in "${projects[@]}"; do
         printf "%-30s %-20s %-15s %-20s %-10s %-12s %-25s\n" "$name" "$project" "$zone" "$vpc" "$os" "$state" "$uptime"
     done
 done
+echo -e "\n✅ Report complete.\n"
