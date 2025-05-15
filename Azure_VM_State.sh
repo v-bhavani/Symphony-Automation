@@ -1,5 +1,21 @@
 #!/bin/bash
+AZURE_CLIENT_ID="$Clientid"
+AZURE_CLIENT_SECRET="$Clientsecret"
+AZURE_TENANT_ID="$Tenantid"
+SUBSCRIPTION_ID="$Subscriptionid"
+# Login to Azure using Service Principal
+az login --service-principal \
+    --username "$AZURE_CLIENT_ID" \
+    --password "$AZURE_CLIENT_SECRET" \
+    --tenant "$AZURE_TENANT_ID" >/dev/null 2>&1
+az account set --subscription "$SUBSCRIPTION_ID" >/dev/null 2>&1
 
+if [[ $? -ne 0 ]]; then
+    echo "❌ Azure login failed. Please check your Service Principal credentials."
+    exit 1
+fi
+
+echo -e "\n🔐 Logged in with Service Principal"
 echo -e "\nGenerating Azure VM Uptime Report...\n"
 
 # Print table header with Users column
