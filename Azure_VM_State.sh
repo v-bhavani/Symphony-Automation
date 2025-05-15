@@ -151,5 +151,5 @@ while IFS=$'\t' read -r vm_name rg_name power_state os_type location; do
     # Print formatted row
     printf "%-25s %-25s %-15s %-10s %-15s %-30s %-15s\n" "$vm_name" "$rg_name" "$power_state" "$os_type" "$location" "$uptime_info" "$user_info"
 done
-
+az logout
 echo -e "\n✅ Report complete.\n"
