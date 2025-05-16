@@ -6,10 +6,10 @@ declare -A accounts
 # Format: accounts[<alias>]="$AWS_ACCESS_KEY_ID|$AWS_SECRET_ACCESS_KEY|$AWS_DEFAULT_REGION"
 accounts["Main"]="$accesskey08|$secretkey08|us-east-1"
 accounts["Demo"]="$accesskey07|$secretkey07|us-west-2"
-accounts["Rhel"]="$accesskey03|$secretkey03|eu-central-1"
-accounts["Abap"]="$accesskey01|$secretkey01|eu-central-1"
-accounts["Xgen"]="$accesskey21|$secretkey21|eu-central-1"
-accounts["bcs"]="$accesskey63|$secretkey63|eu-central-1"
+# accounts["Rhel"]="$accesskey03|$secretkey03|eu-central-1"
+# accounts["Abap"]="$accesskey01|$secretkey01|eu-central-1"
+# accounts["Xgen"]="$accesskey21|$secretkey21|eu-central-1"
+# accounts["bcs"]="$accesskey63|$secretkey63|eu-central-1"
 
 echo -e "\n📋 Generating AWS EC2 VM Report across multiple accounts...\n"
 
