@@ -10,8 +10,8 @@ AWS_SECRET_KEY = "$Secretkey"
 AWS_REGION = "us-east-1"  # Can be any region (billing data is global)
 
 # === Cost Timeframe ===
-FROM_DATE = "2025-02-01"
-TO_DATE = "2025-02-28"
+FROM_DATE = "$Start_date"
+TO_DATE = "$End_date"
 
 # === Boto3 session using keys ===
 session = boto3.Session(
