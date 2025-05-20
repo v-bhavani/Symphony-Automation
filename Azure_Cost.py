@@ -2,9 +2,7 @@ import os
 import json
 import time
 import requests
-import subprocess
 from azure.identity import ClientSecretCredential
-from tabulate import tabulate
 
 # Constants
 subscription_id = "bf18f464-1469-4216-834f-9c6694dbfe26"
@@ -15,13 +13,14 @@ url = f"https://management.azure.com/subscriptions/{subscription_id}/providers/M
 AZURE_TENANT_ID = "$Tenantid"
 AZURE_CLIENT_ID = "$Clientid"
 AZURE_CLIENT_SECRET = "$Clientsecret"
+
 # Azure Client Credential Auth
 tenant_id = AZURE_TENANT_ID
 client_id = AZURE_CLIENT_ID
 client_secret = AZURE_CLIENT_SECRET
 
 if not all([tenant_id, client_id, client_secret]):
-    raise Exception("Missing AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, or AZURE_TENANT_ID environment variable.")
+    raise Exception("Missing Azure client credentials in script variables.")
 
 credential = ClientSecretCredential(tenant_id, client_id, client_secret)
 token = credential.get_token("https://management.azure.com/.default").token
@@ -76,7 +75,7 @@ else:
 
 # Process and format data
 rows = response.json()["properties"]["rows"]
-parsed_data = []
+table_data = []
 labels = []
 sizes = []
 
@@ -84,15 +83,28 @@ for row in rows:
     cost = float(row[0])
     service = row[1]
     currency = row[2]
-    parsed_data.append(["{:>10.2f}".format(cost), service, currency])
+    table_data.append({
+        "PreTaxCost": round(cost, 2),
+        "MeterCategory": service,
+        "Currency": currency
+    })
     labels.append(f"{service} ({cost:.2f} {currency})")
     sizes.append(cost)
 
-# Print formatted cost table
-print("\nAzure Cost Summary Table:")
-print(tabulate(parsed_data, headers=["PreTaxCost", "MeterCategory", "Currency"], tablefmt="grid"))
+# === Output Table JSON ===
+table_output = {
+    "AzureCostSummary": table_data
+}
 
-# Prepare JSON pie chart output
+# Print JSON block for table
+print(f"##gbStart##copilot_ctable_data##splitKeyValue##{json.dumps(table_output)}##gbEnd##")
+
+# Write to file
+with open("azure_cost_table.json", "w") as f:
+    json.dump(table_output, f, indent=2)
+    print("Table data written to azure_cost_table.json")
+
+# === Output Pie Chart JSON ===
 pie_data = {
     "type": "pie",
     "dataSet": [{
@@ -107,7 +119,10 @@ pie_data = {
     "label": labels
 }
 
-# Output JSON pie chart block
+# Print JSON block for pie chart
 print(f"##gbStart##copilot_cpiechart_data##splitKeyValue##{json.dumps(pie_data)}##gbEnd##")
-print("Azure cost pie chart data compiled successfully.")
 
+# Write to file
+with open("azure_cost_piechart.json", "w") as f:
+    json.dump(pie_data, f, indent=2)
+    print("Pie chart data written to azure_cost_piechart.json")
