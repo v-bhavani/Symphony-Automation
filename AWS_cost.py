@@ -10,8 +10,8 @@ AWS_SECRET_KEY = "$Secretkey"
 AWS_REGION = "us-east-1"  # Can be any region (billing data is global)
 
 # === Cost Timeframe ===
-FROM_DATE = "$Start_date"
-TO_DATE = "$End_date"
+FROM_DATE = "2025-02-01"
+TO_DATE = "2025-02-28"
 
 # === Boto3 session using keys ===
 session = boto3.Session(
@@ -39,7 +39,17 @@ except Exception as e:
     sys.exit(1)
 
 # === Parse and prepare table + pie data ===
-grouped_costs = response["ResultsByTime"][0]["Groups"]
+results = response.get("ResultsByTime", [])
+if not results:
+    print("⚠️ No results returned from AWS Cost Explorer.")
+    sys.exit(1)
+
+grouped_costs = results[0].get("Groups", [])
+total = results[0].get("Total", {})
+
+# Use default currency fallback
+currency = total.get("UnblendedCost", {}).get("Unit", "USD")
+
 table_data = []
 pie_labels = []
 pie_values = []
@@ -52,8 +62,11 @@ color_palette = [
 
 for i, group in enumerate(grouped_costs):
     service = group["Keys"][0]
-    cost = float(group["Metrics"]["UnblendedCost"]["Amount"])
-    currency = response["ResultsByTime"][0]["Total"]["UnblendedCost"]["Unit"]
+    cost_str = group["Metrics"].get("UnblendedCost", {}).get("Amount", "0")
+    try:
+        cost = float(cost_str)
+    except ValueError:
+        cost = 0.0
 
     table_data.append({
         "Service": service,
