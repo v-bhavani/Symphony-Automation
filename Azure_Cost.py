@@ -1,4 +1,3 @@
-import os
 import json
 import time
 import requests
@@ -14,15 +13,8 @@ AZURE_TENANT_ID = "$Tenantid"
 AZURE_CLIENT_ID = "$Clientid"
 AZURE_CLIENT_SECRET = "$Clientsecret"
 
-# Azure Client Credential Auth
-tenant_id = AZURE_TENANT_ID
-client_id = AZURE_CLIENT_ID
-client_secret = AZURE_CLIENT_SECRET
-
-if not all([tenant_id, client_id, client_secret]):
-    raise Exception("Missing Azure client credentials in script variables.")
-
-credential = ClientSecretCredential(tenant_id, client_id, client_secret)
+# Azure Authentication
+credential = ClientSecretCredential(AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET)
 token = credential.get_token("https://management.azure.com/.default").token
 headers = {
     "Authorization": f"Bearer {token}",
@@ -73,56 +65,45 @@ for attempt in range(MAX_RETRIES):
 else:
     raise Exception("Failed after multiple retries due to 429 errors.")
 
-# Process and format data
+# Extract rows
 rows = response.json()["properties"]["rows"]
 table_data = []
-labels = []
-sizes = []
+pie_labels = []
+pie_sizes = []
 
-for row in rows:
+# Optional: colors for pie chart
+color_palette = [
+    "#c45850", "#ff9f40", "#ffcc66", "#3cba9f", "#8e5ea2",
+    "#00aaff", "#ff66cc", "#9933ff", "#66cc33", "#ff3333",
+    "#3399ff", "#ffcc00", "#66ffff", "#cc99ff", "#ff9966"
+]
+
+for i, row in enumerate(rows):
     cost = float(row[0])
-    service = row[1]
+    metercategory = row[1]
     currency = row[2]
+
     table_data.append({
+        "MeterCategory": metercategory,
         "PreTaxCost": round(cost, 2),
-        "MeterCategory": service,
         "Currency": currency
     })
-    labels.append(f"{service} ({cost:.2f} {currency})")
-    sizes.append(cost)
 
-# === Output Table JSON ===
-table_output = {
-    "AzureCostSummary": table_data
-}
+    pie_labels.append(f"{metercategory} ({cost:.2f} {currency})")
+    pie_sizes.append(cost)
 
-# Print JSON block for table
-print(f"##gbStart##copilot_ctable_data##splitKeyValue##{json.dumps(table_output)}##gbEnd##")
-
-# Write to file
-with open("azure_cost_table.json", "w") as f:
-    json.dump(table_output, f, indent=2)
-    print("Table data written to azure_cost_table.json")
-
-# === Output Pie Chart JSON ===
+# Compose pie chart structure
 pie_data = {
     "type": "pie",
     "dataSet": [{
         "label": "Azure Service Cost",
-        "data": sizes,
-        "backgroundColor": [
-            "#c45850", "#ff9f40", "#ffcc66", "#3cba9f", "#8e5ea2",
-            "#00aaff", "#ff66cc", "#9933ff", "#66cc33", "#ff3333",
-            "#3399ff", "#ffcc00", "#66ffff", "#cc99ff", "#ff9966"
-        ][:len(sizes)]
+        "data": pie_sizes,
+        "backgroundColor": color_palette[:len(pie_sizes)]
     }],
-    "label": labels
+    "label": pie_labels
 }
 
-# Print JSON block for pie chart
+# Print final JSON blocks
+print(f"##gbStart##copilot_ctable_data##splitKeyValue##{json.dumps(table_data)}##gbEnd##")
 print(f"##gbStart##copilot_cpiechart_data##splitKeyValue##{json.dumps(pie_data)}##gbEnd##")
-
-# Write to file
-with open("azure_cost_piechart.json", "w") as f:
-    json.dump(pie_data, f, indent=2)
-    print("Pie chart data written to azure_cost_piechart.json")
+print("Azure cost table and pie chart data compiled successfully.")
