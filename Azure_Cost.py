@@ -6,8 +6,8 @@ from tabulate import tabulate
 
 # Constants
 subscription_id = "bf18f464-1469-4216-834f-9c6694dbfe26"
-from_date = "2025-02-01"
-to_date = "2025-02-28"
+from_date = "$Start_date"
+to_date = "$End_date"
 api_version = "2021-10-01"
 url = f"https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.CostManagement/query?api-version={api_version}"
 
