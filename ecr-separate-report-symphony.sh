@@ -16,8 +16,7 @@ TIMESTAMP=$(date +"%d-%m-%Y_%H-%M-%S")
 
 # Define file names with TAGNAME and timestamp
 Local_csv_path="/home/ec2-user/SYMPHONY_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}_local.csv"
-Final_csv_name="SYMPHONY_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}.csv"
-Final_csv_path="/home/ec2-user/${Final_csv_name}"
+Final_csv_path="/home/ec2-user/SYMPHONY_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}.xlsx"
 
 execute_command() {
     local command="$1"
@@ -71,7 +70,7 @@ fi
 echo "Report ID is: ${symphony_report_id}"
 
 # Download the CSV file from S3
-sleep 100
+sleep 20
 execute_command "aws s3 cp s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$symphony_report_id.csv $Local_csv_path"
 
 # Extract Summary Information
@@ -92,9 +91,6 @@ echo "Medium, $medium_count" >> "$Local_csv_path"
 echo "Low, $low_count" >> "$Local_csv_path"
 echo "Untriaged, $untriaged_count" >> "$Local_csv_path"
 
-# Rename the CSV file
-mv "$Local_csv_path" "$Final_csv_path"
-
 # Convert CSV to XLSX
 python3 -c "import pandas as pd; pd.read_csv('$Local_csv_path').to_excel('$Final_csv_path', index=False)"
 if [ $? -ne 0 ]; then
@@ -103,7 +99,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Upload the modified CSV back to S3
-execute_command "aws s3 cp $Final_csv_path s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$Final_csv_name"
+execute_command "aws s3 cp $Final_csv_path s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/"
 
 # Remove the original CSV from S3
 execute_command "aws s3 rm s3://$S3_BUCKET_NAME/$S3_KEY_PREFIX/$symphony_report_id.csv"
