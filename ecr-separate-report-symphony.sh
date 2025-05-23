@@ -15,8 +15,8 @@ LOG_FILE="symphony_ecr_scan.log"
 TIMESTAMP=$(date +"%d-%m-%Y_%H-%M-%S")
 
 # Define file names with TAGNAME and timestamp
-Local_csv_path="/home/ec2-user/${Repo}_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}_local.csv"
-Final_csv_path="/home/ec2-user/${Repo}_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}.xlsx"
+Local_csv_path="/home/ec2-user/${ECR_REPO_NAME}_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}_local.csv"
+Final_csv_path="/home/ec2-user/${ECR_REPO_NAME}_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}.xlsx"
 Final_csv_name="${ECR_REPO_NAME}_SCAN_REPORT_${TAGNAME}_${TIMESTAMP}.xlsx"
 
 execute_command() {
