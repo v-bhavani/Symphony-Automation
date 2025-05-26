@@ -55,7 +55,7 @@ echo "ECR Login Successful"
 
 # Inspector report export to S3
 echo "Inspector report exporting to S3."
-sleep 100
+sleep 200
 
 # Run AWS Inspector2 report generation
 symphony_report_id=$(aws inspector2 create-findings-report \
